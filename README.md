@@ -92,11 +92,6 @@ Output models and logs will be saved under `results/`.
 
 ## 📈 GitHub Activity
 
-![](results/figures/github_activity.png)
-
-*Screenshot of continuous commits and contributions—evidence of hands-on development.*
-
----
 
 ## 📚 References
 
