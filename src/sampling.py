@@ -1,12 +1,10 @@
 
-# src/sampling.py
 import torch
 import torch.nn.functional as F
 import random
 
 
-def random_sampling(labels):
-    """Return random negative indices for each anchor."""
+def random_sampling(labels)
     batch_size = labels.size(0)
     negatives = []
     for i in range(batch_size):
