@@ -30,10 +30,7 @@ your-repo/
 
 ## 🛠️ Setup Instructions
 
-1. **Clone the repository**
-
-   ```bash
-   ```
+1. Clone the repository
 2. **Create and activate virtual environment**
 
    ```bash
