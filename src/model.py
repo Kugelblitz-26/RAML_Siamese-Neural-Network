@@ -5,7 +5,7 @@ import torch.nn as nn
 class SiameseNetwork(nn.Module):
     def __init__(self, embedding_dim=128):
         super(SiameseNetwork, self).__init__()
-        # Simple CNN backbone
+        # Simple CNN backbone  
         self.conv = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=5),
             nn.ReLU(inplace=True),
