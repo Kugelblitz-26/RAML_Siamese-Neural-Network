@@ -1,5 +1,6 @@
 import networkx as nx
-
+import heapq
+import logging
 def build_dependency_graph(messages):
     G = nx.DiGraph()
     for msg in messages:
@@ -77,83 +78,101 @@ def schedule_single_node(application_data, policy):
 
 
 
-def schedule_multi_node(application_data, platform_data, policy):
+
+def schedule_multi_node(application_data, platform_data, policy="edf"):
+    logging.info(f"🚀 Starting {policy.upper()} Multi-node scheduling WITHOUT communication delays")
+
     tasks = application_data["tasks"]
     messages = application_data.get("messages", [])
-    num_nodes = len(platform_data.get("nodes", [{"id": 0}]))
+    nodes = [node["id"] for node in platform_data["nodes"] if node["type"] == "compute"]
 
-    G = build_dependency_graph(messages)
-    task_map = {t["id"]: t for t in tasks}
-    scheduled = {}
-    schedule = []
-    node_time = [0] * num_nodes
+    # Build task dependency graph
+    G = nx.DiGraph()
+    for task in tasks:
+        G.add_node(task["id"], task=task)
+    for msg in messages:
+        G.add_edge(msg["sender"], msg["receiver"])
 
-    # Initially schedulable tasks (leaf nodes)
-    available = [t for t in G.nodes if G.in_degree(t) == 0]
+    # Track number of unscheduled dependencies
+    in_degrees = {task["id"]: 0 for task in tasks}
+    for u, v in G.edges:
+        in_degrees[v] += 1
 
-    while available:
-        # Sort according to policy
+    # Priority queue of ready tasks
+    def task_priority(task_id):
+        task = G.nodes[task_id]["task"]
         if policy == "edf":
-            available.sort(key=lambda t: task_map[t]["deadline"])
+            return task["deadline"]
         elif policy == "ldf":
-            available.sort(key=lambda t: -task_map[t]["deadline"])
+            return -task["deadline"]
         elif policy == "ll":
-            def laxity(t):
-                return task_map[t]["deadline"] - task_map[t]["wcet"]
-            available.sort(key=laxity)
+            return task["deadline"] - task["wcet"]
+        else:
+            raise ValueError(f"Unknown policy: {policy}")
 
-        task_id = available.pop(0)
-        task = task_map[task_id]
+    ready_heap = []
+    for task in tasks:
+        if in_degrees[task["id"]] == 0:
+            heapq.heappush(ready_heap, (task_priority(task["id"]), task["id"]))
 
+    task_end_times = {}
+    node_schedules = {node: [] for node in nodes}
+    schedule = []
+
+    while ready_heap:
+        _, task_id = heapq.heappop(ready_heap)
+        task = G.nodes[task_id]["task"]
+        wcet = task["wcet"]
+
+        # Earliest start time after all predecessors complete
         preds = list(G.predecessors(task_id))
-        ready_time = max(scheduled[p]["end_time"] for p in preds) if preds else 0
+        earliest_start = max([task_end_times[p] for p in preds], default=0)
 
-        # Choose earliest available node
-        earliest_start = float("inf")
-        best_node = 0
-        for node_id in range(num_nodes):
-            start = max(node_time[node_id], ready_time)
-            if start < earliest_start:
-                earliest_start = start
-                best_node = node_id
+        # Choose best available node (earliest available time)
+        best_node = None
+        best_start = float("inf")
+        for node in nodes:
+            scheduled = sorted(node_schedules[node])
+            start = earliest_start
+            for s, e in scheduled:
+                if start + wcet <= s:
+                    break
+                start = max(start, e)
+            if start < best_start:
+                best_start = start
+                best_node = node
 
-        start_time = earliest_start
-        end_time = start_time + task["wcet"]
-        node_time[best_node] = end_time
+        # Assign task
+        start_time = best_start
+        end_time = start_time + wcet
+        node_schedules[best_node].append((start_time, end_time))
+        node_schedules[best_node].sort()
+        task_end_times[task_id] = end_time
 
-        entry = {
+        schedule.append({
             "task_id": task_id,
             "node_id": best_node,
             "start_time": start_time,
             "end_time": end_time,
-            "deadline": task["deadline"]
-        }
+            "deadline": task["deadline"],
+            "execution_time": wcet
+        })
 
-        scheduled[task_id] = entry
-        schedule.append(entry)
-        G.remove_node(task_id)
+        # Mark successors as ready if all their predecessors are done
+        for succ in G.successors(task_id):
+            in_degrees[succ] -= 1
+            if in_degrees[succ] == 0:
+                heapq.heappush(ready_heap, (task_priority(succ), succ))
 
-        # Check which successors are now ready (all their preds are scheduled)
-        for succ in list(G.nodes):
-            if succ not in scheduled and all(p in scheduled for p in G.predecessors(succ)) and succ not in available:
-                available.append(succ)
-
-    missed_deadlines = [t["task_id"] for t in schedule if t["end_time"] > t["deadline"]]
+    missed_deadlines = [entry["task_id"] for entry in schedule if entry["end_time"] > entry["deadline"]]
+   
     return {
         "schedule": schedule,
         "missed_deadlines": missed_deadlines,
-        "name": f"{policy.upper()} Multinode (forward scheduling)"
+        "name": f"{policy.upper()} Multinode (no communication delays)"
     }
 
-
-
-def edf_single_node(application_data):
-    return schedule_single_node(application_data, "edf")
-
-def ldf_single_node(application_data):
-    return schedule_single_node(application_data, "ldf")
-
-
+# 🎯 Entrypoints
 def edf_multinode_no_delay(application_data, platform_data):
     return schedule_multi_node(application_data, platform_data, "edf")
 
@@ -162,3 +181,13 @@ def ldf_multinode_no_delay(application_data, platform_data):
 
 def ll_multinode_no_delay(application_data, platform_data):
     return schedule_multi_node(application_data, platform_data, "ll")
+
+
+
+
+
+def edf_single_node(application_data):
+    return schedule_single_node(application_data, "edf")
+
+def ldf_single_node(application_data):
+    return schedule_single_node(application_data, "ldf")
