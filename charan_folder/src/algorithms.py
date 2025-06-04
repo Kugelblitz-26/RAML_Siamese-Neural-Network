@@ -73,7 +73,7 @@ def schedule_single_node(application_data, policy):
     return {
         "schedule": schedule,
         "missed_deadlines": missed_deadlines,
-        "name": f"{policy.upper()} Singlecore (forward scheduling)"
+        
     }
 
 
@@ -169,25 +169,36 @@ def schedule_multi_node(application_data, platform_data, policy="edf"):
     return {
         "schedule": schedule,
         "missed_deadlines": missed_deadlines,
-        "name": f"{policy.upper()} Multinode (no communication delays)"
+        
     }
 
 # 🎯 Entrypoints
-def edf_multinode_no_delay(application_data, platform_data):
-    return schedule_multi_node(application_data, platform_data, "edf")
-
-def ldf_multinode_no_delay(application_data, platform_data):
-    return schedule_multi_node(application_data, platform_data, "ldf")
-
-def ll_multinode_no_delay(application_data, platform_data):
-    return schedule_multi_node(application_data, platform_data, "ll")
-
-
-
-
-
 def edf_single_node(application_data):
-    return schedule_single_node(application_data, "edf")
+    output = schedule_single_node(application_data, "edf")
+    output["name"] = "EDF Single-node"
+    return output
 
 def ldf_single_node(application_data):
-    return schedule_single_node(application_data, "ldf")
+    output = schedule_single_node(application_data, "ldf")
+    output["name"] = "LDF Single-node"
+    return output
+
+def ll_single_node(application_data):
+    output = schedule_single_node(application_data, "ll")
+    output["name"] = "LL Single-node"
+    return output
+
+def edf_multinode_no_delay(application_data, platform_data):
+    output = schedule_multi_node(application_data, platform_data, "edf")
+    output["name"] = "EDF Multinode(without delay)"
+    return output
+
+def ldf_multinode_no_delay(application_data, platform_data):
+    output = schedule_multi_node(application_data, platform_data, "ldf")
+    output["name"] = "LDF Multinode(without delay)"
+    return output
+
+def ll_multinode_no_delay(application_data, platform_data):
+    output = schedule_multi_node(application_data, platform_data, "ll")
+    output["name"] = "LL(without delay)"
+    return output
