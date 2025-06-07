@@ -69,7 +69,7 @@
               {
                 "name": "Random Sampling",
                 "details": [
-                  "Pairs: Randomly select two samples; if same class = positive pair, else negative.",
+                  "Pairs: Randomly select two samples; if same class = positive pair, else negative. ",
                   "Triplets: Randomly select an anchor. Randomly select a positive from the same class. Randomly select a negative from a different class.",
                   "Acts as a baseline."
                 ]
