@@ -23,7 +23,7 @@ your-repo/
 │  └─ train.py            # Training loop and evaluation
 └─ results/
    ├─ figures/            # Plots of loss curves and retrieval metrics
-   └─ tables/             # Summary tables (Recall@k, accuracy)
+   └─ tables/             # Summary tables (Recall, accuracy)
 ```
 
 ---
