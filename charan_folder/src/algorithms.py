@@ -11,7 +11,14 @@ def schedule_single_node(application_data, policy):
     tasks = application_data["tasks"]
     messages = application_data.get("messages", [])
 
-    G = build_dependency_graph(messages)
+    # Build graph with all nodes (tasks), and add edges for messages
+    G = nx.DiGraph()
+    for task in tasks:
+        G.add_node(task["id"])
+    for msg in messages:
+        G.add_edge(msg["sender"], msg["receiver"])
+
+    
     task_map = {t["id"]: t for t in tasks}
     scheduled = {}
     schedule = []
@@ -48,6 +55,7 @@ def schedule_single_node(application_data, policy):
             continue
 
         current_time = end_time
+       
         entry = {
             "task_id": task_id,
             "node_id": 0,
