@@ -1,4 +1,4 @@
-
+#model file, contains the model structure
 import torch
 import torch.nn as nn
 
