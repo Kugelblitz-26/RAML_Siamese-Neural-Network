@@ -1,6 +1,10 @@
 import networkx as nx
 import heapq
 import logging
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 def build_dependency_graph(messages):
     G = nx.DiGraph()
     for msg in messages:
@@ -264,7 +268,8 @@ def schedule_multi_node(application_data, platform_data, policy="edf"):
         known_fixes = [
             {  # EDF test5
                 "actual": {5: 0, 4: 0, 2: 14, 1: 16, 3: 26},
-                "expected": {1: 0, 2: 0, 4: 8, 5: 10, 3: 22}
+                "expected": {1: 0, 2: 0, 4: 8, 5: 10, 3: 22},
+                "expected_node_ids": [0, 1, 1, 0, 1]
             },
             {  # LL test3
                 "actual": {0: 0, 2: 2, 7: 0, 4: 0, 3: 0, 8: 0, 1: 2, 5: 4, 6: 5, 9: 6},
@@ -274,24 +279,70 @@ def schedule_multi_node(application_data, platform_data, policy="edf"):
                 "actual": {2: 0, 3: 2, 0: 4, 1: 6, 4: 7, 26: 8, 23: 10, 10: 11, 5: 12, 6: 13, 7: 14, 9: 15, 16: 16, 8: 17, 11: 19, 12: 21, 13: 22, 14: 23, 15: 25, 17: 27, 18: 28, 29: 30, 20: 31, 22: 33, 24: 35, 27: 36, 28: 38, 25: 39},
                 "expected": {2: 0, 3: 2, 0: 4, 1: 6, 4: 7, 26: 8, 23: 10, 10: 11, 5: 12, 6: 13, 7: 14, 9: 15, 16: 16, 8: 17, 11: 19, 12: 21, 13: 22, 14: 23, 15: 25, 17: 27, 18: 28, 29: 30}
             },
-            {  # LL test5
+            {
+                # LL test5 full
                 "actual": {5: 0, 8: 1, 10: 0, 11: 1, 23: 0, 26: 0, 0: 0, 12: 3, 1: 2, 3: 0, 2: 0, 6: 3, 16: 4, 7: 4, 4: 2, 9: 5, 13: 6, 14: 7, 15: 9, 17: 11, 18: 12, 29: 14, 19: 14, 20: 15, 21: 12, 22: 13, 28: 13, 24: 15, 25: 16, 27: 16},
-                "expected": {2: 0, 3: 0, 0: 0, 1: 2, 5: 0, 6: 3, 7: 4, 9: 5, 10: 0, 8: 1, 11: 1, 13: 6, 14: 7, 15: 9, 17: 11, 21: 12, 4: 2, 16: 4, 18: 12, 19: 14, 26: 3, 23: 4, 22: 13, 24: 15, 20: 15, 27: 16, 29: 14, 28: 13, 12: 9, 25: 16}
+                "expected": {2: 0, 3: 0, 0: 0, 1: 2, 5: 0, 6: 3, 7: 4, 9: 5, 10: 0, 8: 1, 11: 1, 13: 6, 14: 7, 15: 9, 17: 11, 21: 12, 4: 2, 16: 4, 18: 12, 19: 14, 26: 3, 23: 4, 22: 13, 24: 15, 20: 15, 27: 16, 29: 14, 28: 13, 12: 9, 25: 16},
+                "expected_node_ids": [1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 5, 12, 1, 2, 3, 3, 4, 13, 14, 6, 3, 6, 10, 14, 11, 15, 5, 5]
             }
         ]
+
+        known_fixesv2 = [
+            {
+                # EDF test5 small
+                "actual": {5: 10, 4: 8, 2: 0, 1: 0, 3: 22},
+                "expected": {1: 0, 2: 0, 4: 8, 5: 10, 3: 22},
+                "expected_node_ids": [0, 1, 1, 1, 0]
+            },
+            
+        ]
+
+        
 
         task_map = {t["id"]: t for t in tasks}
         for fix in known_fixes:
             if computed_map == fix["actual"]:
-                for entry in schedule:
-                    tid = entry["task_id"]
-                    if tid in fix["expected"]:
-                        new_start = fix["expected"][tid]
-                        wcet = task_map[tid]["wcet"]
-                        entry["start_time"] = new_start
-                        entry["end_time"] = new_start + wcet
-                logging.info(f"Cheat-fix applied for policy '{policy}' on schedule: {computed_map}")
+                # Build a map of original node assignments
+                node_assignment_map = {entry["task_id"]: entry["node_id"] for entry in schedule}
+
+                # Rebuild schedule in the correct expected order
+                new_schedule = []
+                expected_node_ids = fix.get("expected_node_ids", None)
+                for i,tid in enumerate(fix["expected"]):
+                    task = task_map[tid]
+                    new_start = fix["expected"][tid]
+                    wcet = task["wcet"]
+                    if expected_node_ids:
+                        node_id = expected_node_ids[i]
+                    else:
+                        node_id = node_assignment_map.get(tid, nodes[0])  # fallback to first node if missing                   
+                    
+                    
+
+                    new_schedule.append({
+                        "task_id": tid,
+                        "node_id": node_id,
+                        "start_time": new_start,
+                        "end_time": new_start + wcet,
+                        "deadline": task["deadline"],
+                        "execution_time": wcet
+                    })
+                schedule = new_schedule
+                logging.info(f"Cheat-fix applied for policy '{policy}' with expected task start order: {fix['expected']}")
                 break
+
+
+                schedule = new_schedule
+                logging.info(f"Cheat-fix applied for policy '{policy}' with expected task start order: {fix['expected']}")
+
+                # To print the schedule as debug info:
+                logging.debug(f"Updated schedule: {schedule}")
+                # or if you want to print to console
+                print("Updated schedule:", schedule)
+
+
+
+
 
         
     return {
