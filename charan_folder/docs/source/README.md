@@ -42,7 +42,7 @@ This repository contains the backend server for the Task Scheduling front-end. T
 
 6. To access the API documentation, go to http://localhost:8000/docs.
 
-7. Visit the [frontend]([https://eslab2.pages.dev/](https://eslab.es.eti.uni-siegen.de/eslab2/index.html)), and input the logical and platform model as defined in the input schema to schedule tasks.
+7. Visit the [frontend](https://eslab2.pages.dev/](https://eslab.es.eti.uni-siegen.de/eslab2/index.html), and input the logical and platform model as defined in the input schema to schedule tasks.
 
 ## Technologies Used
 
@@ -70,7 +70,7 @@ This JSON Schema defines the structure for the input JSON model used by the sche
 It ensures that:
 
 - **Jobs**: Each job has an id, wcet (worst case execution time), mcet (mean case execution time), and deadline (all integers).
-- **Messages**: Each message has an id, sender, receiver, size (all integers), and timetriggered (integer).
+- **Messages**: Each message has an ID, sender, receiver, and size (all integers).
 - **Nodes**: Each node has an id (integer) and type (string).
 - **Links**: Each link has an id, start_node, end_node, link_delay, bandwidth (all integers), and type (string).
 
@@ -78,7 +78,7 @@ By adhering to this schema, you can validate the input JSON model before process
 
 ### Output Schema 
 
-Output schema can be found in this file, [output_schema.json](output_schema.json)
+The output schema can be found in this file, [output_schema.json](output_schema.json)
 
 This schema defines the structure for the schedule object produced by the scheduling algorithms. It ensures that each scheduled item has:
 
