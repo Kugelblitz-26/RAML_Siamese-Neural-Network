@@ -1,0 +1,210 @@
+{
+  "file_name": "report.pdf",
+  "content_type": "application/pdf_placeholder",
+  "structure": {
+    "title": "Sample Selection Strategies for Siamese Neural Networks",
+    "format": "NeurIPS, 5 Pages (Target)",
+    "sections": [
+      {
+        "title": "Abstract",
+        "status": "Optional but Recommended",
+        "content": [
+          "Briefly introduce Siamese Neural Networks (SNNs) and their reliance on effective pair/triplet selection.",
+          "State the research question concerning the impact of sample selection strategies.",
+          "Mention the strategies investigated (Random, Hard Negative, Semi-Hard Negative, Distance-Based).",
+          "Summarize key findings regarding performance (accuracy, efficiency) on datasets like MNIST and CIFAR-10.",
+          "Conclude with the implications for training SNNs."
+        ]
+      },
+      {
+        "title": "1. Introduction",
+        "content": [
+          "Introduce Siamese Neural Networks (SNNs) as a powerful architecture for similarity learning, one-shot learning, and verification tasks.",
+          "Explain the core idea: mapping inputs to a target space where semantic similarity corresponds to proximity.",
+          {
+            "subtitle": "Importance of sample selection in training SNNs",
+            "points": [
+              "Discuss how the sheer number of possible pairs/triplets makes exhaustive training infeasible.",
+              "Explain how 'easy' samples contribute little to learning, while 'too hard' samples can destabilize training.",
+              "Highlight the goal: selecting informative samples that aid convergence and generalization."
+            ]
+          },
+          {
+            "subtitle": "Statement of the research problem and question",
+            "points": [
+              "Formally state the research question: 'What is the impact of the training-sample selection strategy on the performance of a Siamese Neural Network?'",
+              "Briefly outline the objective: to systematically compare common and novel sampling strategies."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "2. Related Work",
+        "content": [
+          {
+            "subtitle": "Overview of existing sampling strategies in SNNs",
+            "points": [
+              "Early approaches: Random pair/triplet selection.",
+              "Hard Mining: Concepts from FaceNet (Schroff et al., 2015) for hard positive/negative mining. Discuss variations like batch-hard, batch-all.",
+              "Semi-Hard Negative Mining: (Schroff et al., 2015) as a more stable alternative to hard negative mining.",
+              "Distance-weighted sampling: (e.g., Wu et al., 2017, 'Sampling Matters in Deep Embedding Learning').",
+              "Other relevant strategies (e.g., curriculum learning for SNNs, easy positive mining)."
+            ]
+          },
+          {
+            "subtitle": "Discussion of recent advancements and studies",
+            "points": [
+              "Cite recent papers that compare sampling strategies or propose novel ones.",
+              "Identify gaps in existing research that this study aims to address (e.g., comparison across specific datasets, direct comparison of certain strategies, impact on efficiency)."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "3. Methodology",
+        "content": [
+          {
+            "subtitle": "Description of implemented sampling strategies",
+            "strategies": [
+              {
+                "name": "Random Sampling",
+                "details": [
+                  "Pairs: Randomly select two samples; if same class = positive pair, else negative. ",
+                  "Triplets: Randomly select an anchor. Randomly select a positive from the same class. Randomly select a negative from a different class.",
+                  "Acts as a baseline."
+                ]
+              },
+              {
+                "name": "Hard Negative Mining (Online/Offline)",
+                "details": [
+                  "For Triplet Loss: Given an anchor (A) and positive (P), find a negative (N) such that d(A,N) is minimized, subject to d(A,N) < d(A,P) + margin (or just smallest d(A,N) if 'all' hard negatives).",
+                  "Online: Within a mini-batch, find hardest negatives.",
+                  "Offline: Periodically compute all embeddings, mine hard negatives globally, then train on these."
+                ]
+              },
+              {
+                "name": "Semi-Hard Negative Sampling (Online/Offline)",
+                "details": [
+                  "For Triplet Loss: Given an anchor (A) and positive (P), find a negative (N) such that d(A,P) < d(A,N) < d(A,P) + margin.",
+                  "More stable than pure hard negative mining."
+                ]
+              },
+              {
+                "name": "Distance-Based Sampling",
+                "details": [
+                  "A more general approach. Could involve:",
+                  "Sampling negatives with probability inversely proportional to their distance from the anchor (within a certain range).",
+                  "Stratified sampling from different distance 'bins' relative to the anchor/positive pair.",
+                  "Focus on sampling negatives that are 'moderately' hard, avoiding the extremes.",
+                  "Specify the exact mechanism used. For example: 'Negatives are sampled from a pool where the probability of selection is weighted by exp(-d(A,N)/T), where T is a temperature parameter, focusing on negatives closer to the anchor but not necessarily the absolute hardest.'"
+                ]
+              }
+            ]
+          },
+          {
+            "subtitle": "Details of the Siamese Network architecture used",
+            "points": [
+              "Specify the backbone (e.g., a simple CNN).",
+              "Example: 2-3 Convolutional layers (e.g., 32 filters, 5x5 kernel, ReLU), Max Pooling, Flatten layer, Dense layer (e.g., 128 units, ReLU), final Embedding layer (e.g., 64 units, no activation or L2 normalization).",
+              "State how weights are shared between the two (or three for triplets) branches.",
+              "Mention the dimensionality of the output embedding space."
+            ]
+          },
+          {
+            "subtitle": "Datasets selected for evaluation",
+            "points": [
+              "MNIST: Grayscale handwritten digits (28x28). 10 classes. Good for initial testing and debugging.",
+              "CIFAR-10: Color images (32x32x3). 10 classes. More complex than MNIST.",
+              "(Optional: A more complex dataset like LFW for faces, or a fine-grained dataset if time permits).",
+              "Justify choices (benchmark status, varying complexity, clear class labels).",
+              "Detail train/test splits."
+            ]
+          },
+          {
+            "subtitle": "Training procedures and loss functions applied",
+            "points": [
+              "Loss Function: Primarily Triplet Loss: L = max(0, d(A,P)^2 - d(A,N)^2 + margin). Specify the margin value.",
+              "(Optional: Contrastive Loss if pair-based strategies are deeply explored: L = y * d^2 + (1-y) * max(0, margin - d)^2, where y=1 for positive pairs, y=0 for negative pairs).",
+              "Optimizer: Adam (specify learning rate, e.g., 1e-3 or 1e-4).",
+              "Batch Size: (e.g., 64, 128). Note how batch size interacts with online mining strategies.",
+              "Number of Epochs: (e.g., 20-50, or until convergence).",
+              {
+                "sub-subtitle": "Evaluation Protocol",
+                "items": [
+                  "How performance is measured on the test set:",
+                  "Verification Accuracy: Take pairs of test images, predict if they are from the same class based on a distance threshold in the embedding space. Report accuracy, Precision, Recall, F1-score, ROC AUC.",
+                  "k-NN Accuracy: For each test embedding, find its k-nearest neighbors in the embedding space of other test samples. Assign class based on majority vote of neighbors.",
+                  "Clustering Quality: (e.g., Silhouette score, NMI if ground truth clusters are known).",
+                  "Efficiency Metric: Training time per epoch, total training time to reach a target performance."
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "4. Results & Discussion",
+        "content": [
+          {
+            "subtitle": "Performance metrics for each sampling strategy",
+            "points": [
+              "Tables comparing: Verification Accuracy (and/or k-NN accuracy, ROC AUC) on test sets for each dataset & strategy; Training time (total, per epoch); Number of active triplets/pairs found by mining strategies.",
+              "Learning curves (loss vs. epochs, accuracy vs. epochs)."
+            ]
+          },
+          {
+            "subtitle": "Comparative analysis and visualizations",
+            "points": [
+              "Bar charts directly comparing key metrics across strategies.",
+              "t-SNE plots: Visualize the embedding space of test data for each strategy. Look for better class separation.",
+              "Scatter plots of d(A,P) vs. d(A,N) for batches generated by different strategies."
+            ]
+          },
+          {
+            "subtitle": "Interpretation of results in the context of the research question",
+            "points": [
+              "Which strategy performed best on which dataset and why?",
+              "Discuss the trade-off between computational cost of sampling and model performance improvement.",
+              "Did hard/semi-hard mining lead to faster convergence or better final accuracy compared to random?",
+              "How did the custom 'Distance-Based Sampling' perform?",
+              "Relate findings to the properties of the datasets (e.g., inter-class vs. intra-class variability)."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "5. Limitations and Future Work",
+        "content": [
+          {
+            "subtitle": "Discussion of any constraints faced during the study",
+            "points": [
+              "Computational resources (limited GPU time might restrict number of epochs, batch size, or dataset size).",
+              "Scope of datasets (e.g., only tested on image datasets with clear categories).",
+              "Simplicity of SNN architecture (results might differ with deeper/more complex backbones).",
+              "Hyperparameter tuning (extent of tuning for each strategy).",
+              "Choice of distance metric (typically Euclidean, but others exist)."
+            ]
+          },
+          {
+            "subtitle": "Suggestions for further research and improvements",
+            "points": [
+              "Test on more diverse and larger-scale datasets (e.g., fine-grained classification, instance retrieval).",
+              "Investigate the impact of different SNN architectures (e.g., ResNet, Vision Transformers).",
+              "Explore adaptive or curriculum-based sampling strategies.",
+              "Analyze the theoretical underpinnings of why certain strategies work better.",
+              "Combine different sampling strategies.",
+              "Investigate the impact on few-shot learning scenarios.",
+              "Explore online vs. offline mining trade-offs more deeply."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "References",
+        "content": [
+          "List of cited works in NeurIPS format."
+        ]
+      }
+    ]
+  }
+}
