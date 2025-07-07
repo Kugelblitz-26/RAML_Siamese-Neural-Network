@@ -56,7 +56,7 @@ def distance_weighted_sampling(embeddings, labels, cutoff=0.5, nonzero=1e-12):
     for i in range(batch_size):
         mask = labels != labels[i]
         d = dist[i][mask]
-        # density estimation: p(d) ~ d^(dim-2) * (1 - d^2/4)^((dim-3)/2),.
+        # density estimation: p(d) ~ d^(dim-2) * (1 - d^2/4)^((dim-3)/2)
         dim = embeddings.size(1)
         q_d = (d + nonzero).pow(dim - 2) * (1 - 0.25 * d.pow(2)).clamp(min=0)
         w = 1.0 / (q_d + nonzero)

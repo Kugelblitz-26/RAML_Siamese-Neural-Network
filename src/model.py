@@ -14,8 +14,8 @@ class SiameseNetwork(nn.Module):
             nn.ReLU(inplace=True),             # Activation function
             nn.MaxPool2d(2),                   # Downsample by a factor of 2
             nn.Conv2d(32, 64, kernel_size=5),  # 32 input channels, 64 output channels, 5x5 filter
-            nn.ReLU(inplace=True),             # Activation function.
-            nn.MaxPool2d(2),                   
+            nn.ReLU(inplace=True),             # Activation function
+            nn.MaxPool2d(2),                   # Downsample by a factor of 2
         )
 
         # Fully connected layers to produce the final embedding
