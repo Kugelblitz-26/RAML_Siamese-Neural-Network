@@ -21,7 +21,6 @@ The goal is to understand how architecture and loss function choices interact, v
 ## Repository Structure
 
 ```
-
 ├── notebooks/                # Jupyter notebooks used for exploratory data analysis and experiments
 │
 ├── README.md                 # This file
@@ -34,7 +33,7 @@ The goal is to understand how architecture and loss function choices interact, v
 
    ```bash
    git clone https://github.com/Kugelblitz-26/RAML_Siamese-Neural-Network.git
-   cd siamese-networks-comparison
+   cd RAML_Siamese-Neural-Network
    ```
 
 2. **Install dependencies**
@@ -49,7 +48,7 @@ The goal is to understand how architecture and loss function choices interact, v
 
 3. **Prepare datasets**
 
-   - download and preparing LFW, Georgia Tech Faces, and Amazon Book Reviews.
+   - Download and prepare LFW, Georgia Tech Faces, and Amazon Book Reviews.
    - Ensure data directories are correctly set in training scripts or config files.
 
 ## Usage
@@ -74,6 +73,59 @@ The goal is to understand how architecture and loss function choices interact, v
 
   Implementations include easy extensions for hard negative mining, dynamic pair generation, and model checkpointing.
 
+## Face Verification
+
+This section evaluates the performance of Siamese Neural Networks (SNNs) on face recognition using the Labeled Faces in the Wild (LFW) and Georgia Tech Faces (GTech) datasets. The goal is to understand how different loss functions and architectures impact face verification performance.
+
+### 📁 `case1/Experiment1`: Architecture and Loss Function Comparison
+
+This experiment investigates how different backbone architectures and loss functions affect the performance of SNNs for face recognition. The folder contains:
+
+```
+case1/Experiment1/
+├── analysis.py         # Code to evaluate performance metrics (e.g., accuracy, ROC-AUC, etc.)
+├── architectures.py    # Definitions of backbone networks like ResNet18, VGG16, SimpleCNN, etc.
+├── Gtech/              # Contains the Georgia Tech Face dataset and preprocessing code
+├── LFW/                # Contains the LFW dataset and preprocessing code
+├── loss.py             # Implementation of loss functions (Contrastive, Triplet, etc.)
+├── sampling.py         # Triplet and pair sampling logic for Siamese training
+├── train.py            # 🔰 Entry point: Training script with model instantiation and training loop
+└── visualise.py        # Code to visualize learned embeddings using t-SNE, PCA, etc.
+```
+
+### ▶️ Running the Code
+
+The main script to initiate training is:
+
+```bash
+python train.py
+```
+
+This file imports components from other modules:
+- **Architectures** from `architectures.py`
+- **Loss functions** from `loss.py`
+- **Dataset loading and preprocessing** from the `LFW/` and `Gtech/` directories
+- **Sampling strategies** from `sampling.py`
+- **Visualization tools** from `visualise.py`
+
+You **must configure the dataset paths** within the respective dataset folders (`LFW/` and `Gtech/`) to ensure correct data loading before training.
+
+### 🔧 Dependencies
+
+Ensure all required libraries are included in `requirements.txt`. Common dependencies include:
+
+```txt
+torch
+torchvision
+numpy
+matplotlib
+scikit-learn
+pandas
+tqdm
+```
+
+(Please verify your local environment and update this file accordingly.)
+
 ## Key Contributions and Extensions
 
 - Integration and extension of third-party codebases:
@@ -95,8 +147,3 @@ See [REPORT.md](./notebooks/REPORT.md) for the full research write-up and result
 - Official PyTorch models and torchvision libraries.
 
 Please see the full report for a complete bibliography.
-
-
-
----
-
