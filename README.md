@@ -1,78 +1,100 @@
 # RAML_Siamese-Neural-Network
 
+# Siamese Neural Networks: Comparative Study on Architecture and Loss Functions
 
+## Overview
 
+This repository contains the implementation and experiments for a research project studying the impact of different backbone architectures and loss functions on Siamese Neural Networks (SNNs) across two distinct domains:
 
-## 📚 References
+1. **Face Verification**  
+   - Datasets: Labeled Faces in the Wild (LFW) and Georgia Tech Faces dataset  
+   - Architectures: MLP, SimpleCNN, ResNet18, ResNet50, VGG16, MobileNetV3  
+   - Loss Functions: Contrastive Loss, Triplet Loss, Cosine Embedding Loss, InfoNCE Loss
 
+2. **Book Recommendation**  
+   - Dataset: Amazon Book Reviews subset (30,000 user-book interactions)  
+   - Architectures: MLP (metadata only), CNN (1D text), BERT (DistilBERT), Hybrid (combining CNN and MLP)  
+   - Loss Functions: Contrastive Loss, Triplet Loss, Circle Loss
 
-### 🧠 Core Research Papers (Siamese Neural Networks)
+The goal is to understand how architecture and loss function choices interact, vary by data modality and domain, and affect model performance, computational efficiency, and practical deployment considerations.
 
-- Koch, G., Zemel, R., & Salakhutdinov, R. (2015). **Siamese Neural Networks for One-shot Image Recognition**.  
-  [PDF](https://www.cs.cmu.edu/~rsalakhu/papers/oneshot1.pdf)
+## Repository Structure
 
-- Dey, S., Dutta, A., Toledo, J. I., Ghosh, S. K., Lladós, J., & Pal, U. (2017). **SigNet: Convolutional Siamese Network for Writer-Independent Offline Signature Verification**.  
-  *arXiv:1707.02131*  
-  [arXiv PDF](https://arxiv.org/pdf/1707.02131)
+```
 
-- Chopra, S., Hadsell, R., & LeCun, Y. (2005). **Learning a Similarity Metric Discriminatively with Application to Face Verification**.  
-  *CVPR 2005*  
-  [IEEE](https://doi.org/10.1109/CVPR.2005.202)
+├── notebooks/                # Jupyter notebooks used for exploratory data analysis and experiments
+│
+├── README.md                 # This file
+└── requirements.txt          # Python dependencies
+```
 
-- Schroff, F., Kalenichenko, D., & Philbin, J. (2015). **FaceNet: A Unified Embedding for Face Recognition and Clustering**.  
-  *IEEE CVPR*  
-  [IEEE Xplore](https://ieeexplore.ieee.org/document/9893751)
+## Installation and Setup
 
-- Neculoiu, P., Versteegh, M., & Rotaru, M. (2016). **Learning Text Similarity with Siamese Recurrent Networks**.  
-  *1st Workshop on Representation Learning for NLP, ACL*  
-  [PDF](https://aclanthology.org/W16-1617.pdf)
+1. **Clone the repository**
 
-- CS231n Report (2017). **Signature Verification using Siamese Networks**.  
-  *Stanford University Project Report*  
-  [PDF](https://cs231n.stanford.edu/reports/2017/pdfs/801.pdf)
+   ```bash
+   git clone https://github.com/Kugelblitz-26/RAML_Siamese-Neural-Network.git
+   cd siamese-networks-comparison
+   ```
 
----
+2. **Install dependencies**
 
-### 🧪 Advanced Architectures and Applications
+   We recommend using a Python virtual environment.
 
-- Dey, S. et al. (2021). **Multi-view Feature Fusion Siamese Networks for Cross-Modal Retrieval**.  
-  *IEEE Transactions on Image Processing*  
-  [IEEE](https://ieeexplore.ieee.org/document/9397114)
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-- IEEE (2021). **Cross-modal SNN for Deep Hashing Retrieval**.  
-  [IEEE](https://ieeexplore.ieee.org/document/9288128)
+3. **Prepare datasets**
 
-- IEEE (2022). **Image Matching with Siamese Neural Networks**.  
-  [IEEE](https://ieeexplore.ieee.org/document/9883686)
+   - Follow instructions in `data/README.md` for downloading and preparing LFW, Georgia Tech Faces, and Amazon Book Reviews.
+   - Ensure data directories are correctly set in training scripts or config files.
 
----
+## Usage
 
-### 📚 Additional / Foundational Works
+- **Train Face Verification Models**
 
-- Wang, J., et al. (2021). **Deep Metric Learning: A Survey**.  
-  *IEEE TPAMI*  
-  [DOI](https://doi.org/10.1109/TPAMI.2020.2992932)
+  ```bash
+  python training/train_face_verification.py --epochs 5 --batch_size 32 --architecture MobileNetV3 --loss Triplet
+  ```
 
-- Musgrave, K., Belongie, S., & Lim, S. N. (2020). **A Metric Learning Reality Check: The Importance of Sample Mining Strategies**.  
-  *arXiv:2003.08505*  
-  [arXiv](https://arxiv.org/abs/2003.08505)
+- **Train Book Recommendation Models**
 
-- Song, H.O., Xiang, Y., Jegelka, S., & Savarese, S. (2016). **Deep Metric Learning via Lifted Structured Feature Embedding**.  
-  *CVPR 2016*  
-  [arXiv](https://arxiv.org/abs/1511.06452)
+  ```bash
+  python training/train_book_recommendation.py --epochs 4 --batch_size 64 --architecture Hybrid --loss Contrastive
+  ```
 
-- Movshovitz-Attias, Y. et al. (2017). **No Fuss Distance Metric Learning Using Proxies**.  
-  *ICCV 2017*  
-  [arXiv](https://arxiv.org/abs/1703.07464)
+- **Evaluate Models and Visualize Embeddings**
 
-- Beel, J., Tyrell, B., et al. (2020). **Siamese Meta-Learning and Algorithm Selection with 'Algorithm-Performance Personas'**.  
-  *arXiv:2006.12328*  
-  [arXiv PDF](https://arxiv.org/pdf/2006.12328.pdf)
+  Use provided utilities in `utils/` or notebooks for t-SNE visualization and performance metrics.
 
+- **Advanced Training**
 
+  Implementations include easy extensions for hard negative mining, dynamic pair generation, and model checkpointing.
 
+## Key Contributions and Extensions
 
+- Integration and extension of third-party codebases:
+  - Base Siamese MLP implementation adapted from [MLP-Siamese-Network GitHub repository](https://github.com/Setarehkhaleghian/MLP-Siamese-Network) (extended for multimodal data and supported extra architectures).
+  - Face recognition Siamese pipeline inspired by Kaggle notebook [Face Recognition using Siamese Networks](https://www.kaggle.com/code/vijaykrishnan1905/face-recognition-using-siamese-networks).
+- Novel hybrid architecture combining CNN-based text encoding with MLP-based metadata for book recommendation.
+- Comprehensive comparative study evaluating multiple loss functions across different domains and architectures.
+- Detailed analysis of computational trade-offs to inform deployment decisions.
 
+See [REPORT.md](./notebooks/REPORT.md) for the full research write-up and results.
+
+## References
+
+- Schroff et al., 2015. FaceNet: A unified embedding for face recognition and clustering.  
+- Chopra et al., 2005. Learning a similarity metric discriminatively, with application to face verification.  
+- Sanh et al., 2019. DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter.  
+- He et al., 2017. Neural Collaborative Filtering.  
+- Sun et al., 2020. Circle loss: A unified perspective of pair similarity optimization.  
+- Official PyTorch models and torchvision libraries.
+
+Please see the full report for a complete bibliography.
 
 
 
