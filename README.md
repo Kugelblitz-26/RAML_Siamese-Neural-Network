@@ -49,7 +49,7 @@ The goal is to understand how architecture and loss function choices interact, v
 
 3. **Prepare datasets**
 
-   - Follow instructions in `data/README.md` for downloading and preparing LFW, Georgia Tech Faces, and Amazon Book Reviews.
+   - download and preparing LFW, Georgia Tech Faces, and Amazon Book Reviews.
    - Ensure data directories are correctly set in training scripts or config files.
 
 ## Usage
@@ -57,13 +57,13 @@ The goal is to understand how architecture and loss function choices interact, v
 - **Train Face Verification Models**
 
   ```bash
-  python training/train_face_verification.py --epochs 5 --batch_size 32 --architecture MobileNetV3 --loss Triplet
+  python final.ipynb
   ```
 
 - **Train Book Recommendation Models**
 
   ```bash
-  python training/train_book_recommendation.py --epochs 4 --batch_size 64 --architecture Hybrid --loss Contrastive
+  python book/ex.ipynb
   ```
 
 - **Evaluate Models and Visualize Embeddings**
